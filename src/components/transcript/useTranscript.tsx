@@ -11,8 +11,11 @@ const useTranscript = () => {
     for (const search of searchStrings) {
       const replace = `<span class="highlight">${search}</span>`;
       const replacedText = replace.replace('/', '').replace('/g', '');
-      const regex = new RegExp(search, 'g');
-      modifiedText = modifiedText.replace(regex, replacedText);
+      const regex = new RegExp(replacedText, 'g');
+      const modifiedRegex = regex
+        .toString()
+        .replace(/(\/<span class="highlight">|span>\/g|<|\/|\\)/g, '');
+      modifiedText = modifiedText.replace(modifiedRegex, replacedText);
     }
 
     return modifiedText;
@@ -25,6 +28,7 @@ const useTranscript = () => {
       highlightedText.push(regs);
     });
 
+    console.log('what the f happened to 1st one', highlightedText);
     const newText = replaceStringsInText(text, highlightedText);
 
     return <p dangerouslySetInnerHTML={{ __html: newText }} />;
