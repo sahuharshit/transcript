@@ -6,6 +6,19 @@ import { useState } from 'react';
 const useTranscript = () => {
   const [highlightRef, setHighlightRef] = useState<number[][]>([]);
 
+  function isSubstringInRange(
+    text: string,
+    substring: string,
+    range: [number, number],
+  ): boolean {
+    const startIndex = text.indexOf(substring);
+    if (startIndex >= range[0] && startIndex + substring.length <= range[1]) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   function replaceStringsInText(text: string, searchStrings: string[]): string {
     let modifiedText = text;
     for (const search of searchStrings) {
@@ -15,7 +28,12 @@ const useTranscript = () => {
       const modifiedRegex = regex
         .toString()
         .replace(/(\/<span class="highlight">|span>\/g|<|\/|\\)/g, '');
-      modifiedText = modifiedText.replace(modifiedRegex, replacedText);
+
+      highlightRef.map((range) => {
+        const [start, end] = range;
+        const inRange = isSubstringInRange(text, modifiedRegex, range);
+        if (inRange) modifiedText = modifiedText.replace(modifiedRegex, replacedText);
+      });
     }
 
     return modifiedText;
@@ -28,7 +46,6 @@ const useTranscript = () => {
       highlightedText.push(regs);
     });
 
-    console.log('what the f happened to 1st one', highlightedText);
     const newText = replaceStringsInText(text, highlightedText);
 
     return <p dangerouslySetInnerHTML={{ __html: newText }} />;
